@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  key       String     @unique
+  label     String
+  pipelines Pipeline[]
+}
+
+type Pipeline {
+  key    String
+  label  String
+  stages Stage[]
+  jira   JiraConfig?
+}
+
+type Stage {
+  key   String
+  label String
+  color String
+}
+
+type JiraConfig {
+  baseUrl   String
+  pid       String
+  issueType String
+}
+
+model Counter {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String @unique
+  value Int    @default(0)
+}
+
+model Template {
+  id               String       @id @default(auto()) @map("_id") @db.ObjectId
+  internalId       String       @unique
+  templateId       String?
+  name             String
+  channels         Channel[]
+  stage            String
+  status           String       @default("inProgress")
+  owner            String
+  date             String?
+  days             Int          @default(0)
+  pipelines        String[]
+  transitions      Transition[]
+  isUpdate         Boolean      @default(false)
+  parentTemplateId String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+type Channel {
+  type    String
+  content Json
+}
+
+type Transition {
+  from      String?
+  to        String
+  date      String
+  by        String
+  note      String
+  files     String[]
+  direction String?
+}
